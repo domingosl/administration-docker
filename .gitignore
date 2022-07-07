@@ -2,3 +2,4 @@
 authelia_config
 nginx_data
 nginx_letsencrypt
+redis_data
