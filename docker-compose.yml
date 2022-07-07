@@ -30,33 +30,6 @@ services:
     networks:
       - backend
 
-  authelia:
-    image: authelia/authelia
-    volumes:
-      - ./authelia_config:/config
-    ports:
-      - 9091:9091
-    restart: unless-stopped
-    healthcheck:
-      disable: true
-    environment:
-      - TZ=Europe/Rome
-    depends_on:
-      - redis_authelia
-    networks:
-      - backend
-
-  redis_authelia:
-      image: redis:alpine
-      volumes:
-        - ./redis_data:/data
-      expose:
-        - 6379
-      restart: unless-stopped
-      environment:
-        - TZ=Europe/Rome
-      networks:
-        - backend
 volumes:
   portainer_data:
 networks:
