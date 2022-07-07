@@ -1,0 +1,63 @@
+version: '3'
+services:
+  nginx_proxy_manager:
+    container_name: nginx-proxy-manager
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./nginx_data:/data
+      - ./nginx_letsencrypt:/etc/letsencrypt
+      - "/var/run/docker.sock:/tmp/docker.sock:ro"
+    networks:
+      - backend
+
+  portainer:
+    image: cr.portainer.io/portainer/portainer-ce
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    environment:
+      - VIRTUAL_HOST=portainer.growish.com
+      - VIRTUAL_PORT=9000
+    ports:
+      - 8000:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - backend
+
+  authelia:
+    image: authelia/authelia
+    volumes:
+      - ./authelia_config:/config
+    ports:
+      - 9091:9091
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    environment:
+      - TZ=Europe/Rome
+    depends_on:
+      - redis_authelia
+    networks:
+      - backend
+
+  redis_authelia:
+      image: redis:alpine
+      volumes:
+        - ./redis_data:/data
+      expose:
+        - 6379
+      restart: unless-stopped
+      environment:
+        - TZ=Europe/Rome
+      networks:
+        - backend
+volumes:
+  portainer_data:
+networks:
+  backend:
